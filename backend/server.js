@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -26,6 +27,15 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/users', require('./routes/users'));
+
+// Serve static files from the Angular app build directory
+const frontendPath = path.join(__dirname, '../frontend/dist/chronolink-frontend');
+app.use(express.static(frontendPath));
+
+// Catch all handler: send back Angular's index.html file for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
